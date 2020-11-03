@@ -1,15 +1,17 @@
-# Maintainer: Stephanie Wilde-Hobbs <git@stephanie.is>
+# Maintainer: Raphiel Rollerscaperers <raphielscape@raphielgang.org>
+# Contributor: Stephanie Wilde-Hobbs <git@stephanie.is>
 # Contributor: Sven-Hendrik Haase <sh@lutzhaase.com>
 # Contributor: SanskritFritz (gmail)
 
 pkgname=netdata-git
 _gitname=netdata
-pkgver=v1.17.0.r31.g0af353168
+pkgver=v1.26.0.r113.g4548a54cf
 pkgrel=1
 pkgdesc="Real-time performance monitoring, in the greatest possible detail, over the web"
-url="https://github.com/firehol/netdata/wiki"
+url="https://github.com/netdata/netdata/wiki"
 arch=('x86_64')
 license=('GPL')
+options=(!buildflags)
 depends=('libmnl' 'libnetfilter_acct' 'zlib' 'judy' 'libuv' 'openssl')
 makedepends=('git')
 optdepends=('nodejs: for monitoring named and SNMP devices'
@@ -21,7 +23,7 @@ optdepends=('nodejs: for monitoring named and SNMP devices'
             'hddtemp: for monitoring hhd temperature'
             'apcupsd: for monitoring APC UPS'
             'iw: for monitoring Linux as access point')
-source=("$_gitname::git+https://github.com/firehol/netdata"
+source=("$_gitname::git+https://github.com/netdata/netdata.git"
         "${_gitname}.tmpfiles"
         "${_gitname}.sysusers")
 sha512sums=('SKIP'
@@ -39,6 +41,12 @@ pkgver() {
 build() {
   cd "$_gitname"
 
+  CFLAGS+="-falign-functions=32 -fno-math-errno -fno-trapping-math \
+            -fstack-protector-strong -funroll-loops"
+  CXXFLAGS+="-march=native -mtune=native -falign-functions=32 -fno-math-errno -Wno-unknown-warning-option\
+              -fno-trapping-math -fstack-protector-strong -funroll-loops -pipe -fno-plt \
+              -fasynchronous-unwind-tables -fno-omit-frame-pointer -Wp,-D_REENTRANT"
+  LDFLAGS+="-Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now"
   autoreconf -ivf
 
   ./configure \
